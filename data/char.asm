@@ -7,7 +7,6 @@ push 'H'  ; 'H' -> stack
 
 
 ; esp -> ['H' 00 00 00][ret]
-
 call [ebx+1*4]  
 add esp, 4       
 

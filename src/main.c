@@ -5,7 +5,7 @@
 
 #define MAX_DATA_SIZE 256
 #define MAX_TOKEN_LENGTH 64
-#define MAX_TOKEN_SIZE 1024
+#define MAX_TOKEN_SIZE 32
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
@@ -38,10 +38,11 @@ int main(int argc, char *argv[]) {
     char buffer[MAX_DATA_SIZE];
     bool was_prev_line_empty = false;
 
-    char tokens[10][MAX_TOKEN_LENGTH];
+    char tokens[MAX_TOKEN_SIZE][MAX_TOKEN_LENGTH];
     int token_size = 0;
     int token_start = -1;
     int token_end = -1;
+    bool is_comment = false;
 
     while (fgets(buffer, MAX_DATA_SIZE, stdin) != NULL) {
 
@@ -53,13 +54,19 @@ int main(int argc, char *argv[]) {
             if (was_prev_line_empty)
                 continue;
 
+            is_comment = false;
             was_prev_line_empty = true;
         } else {
+            if (is_comment) {
+                printf("\n");
+                is_comment = false;
+            }
+
             was_prev_line_empty = false;
         }
 
         const int buffer_len = strlen(buffer);
-        for (int i = 0; i < buffer_len; i++) {
+        for (int i = 0; i < buffer_len && token_size < MAX_TOKEN_SIZE; i++) {
             switch (buffer[i]) {
             case ' ':
             case '\r':
@@ -91,13 +98,14 @@ int main(int argc, char *argv[]) {
 
         if (strncmp(tokens[0], ";", 1) == 0) {
             printf("%-10s", ";");
-            continue;
-        }
-
-        if (token_in_array(tokens[0], (char **)commands, ARRAY_SIZE(commands)))
+            is_comment = true;
+        } else if (token_in_array(tokens[0], (char **)commands,
+                                  ARRAY_SIZE(commands)))
             printf("%10c", ' ');
 
-        for (int i = 0; i < token_size; i++) {
+        for (int i = is_comment; i < token_size; i++) {
+            if (strncmp(tokens[i], ";", 1) == 0)
+                printf(" ");
             printf("%s ", tokens[i]);
         }
         printf("\n");
