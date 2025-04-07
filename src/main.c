@@ -33,7 +33,7 @@ const char *instructions[] = {
     "movsb", "movsw", "movsd",  "stosb", "stosw",  "stosd",  "lodsb",
     "lodsw", "lodsd", "scasb",  "scasw", "scasd",  "cmpsb",  "cmpsw",
     "cmpsd", "rep",   "repe",   "repne", "repnz",  "repz",   "lock",
-    "[bits", "dd",    "db"};
+    "[bits", "db",    "dw",     "dd",    "dq",     "db",     "movzx"};
 
 struct TokenLine {
     char instruction[TOKEN_LENGTH];
@@ -44,7 +44,6 @@ void strncpy_trim(char *dest, const char *src, const unsigned int n) {
     assert(src != NULL);
     assert(strlen(src) != 0);
     assert(strlen(src) <= n);
-    // printf("len: %lu", strlen(src));
 
     int j = 0;
     for (int i = 0; src[i] != 0 || i < n - 1; ++i) {
@@ -85,15 +84,15 @@ void tokenline_add(struct TokenLine *tokenline, const char *line) {
     free(str);
     str = NULL;
     split = NULL;
+}
 
-    // for (int i = 0; i < strlen(tokenline->instruction); i++) {
-    //     if (tokenline->instruction[i] == '\n')
-    //         tokenline->instruction[i] = 0;
-    // }
-    // for (int i = 0; i < strlen(tokenline->comment); i++) {
-    //     if (tokenline->comment[i] == '\n')
-    //         tokenline->comment[i] = 0;
-    // }
+int get_word_len(char *str) {
+    int word_len = 0;
+    while (str[word_len] != ' ' && str[word_len] != 0 &&
+           str[word_len] != '\n') {
+        word_len++;
+    }
+    return ++word_len;
 }
 
 void module_print(struct TokenLine *tokens, const unsigned int line_count) {
@@ -116,14 +115,7 @@ void module_print(struct TokenLine *tokens, const unsigned int line_count) {
             continue;
         }
 
-        int word_len = 0;
-        while (tokens[i].instruction[word_len] != ' ' &&
-               tokens[i].instruction[word_len] != 0 &&
-               tokens[i].instruction[word_len] != '\n') {
-            word_len++;
-        }
-        word_len++;
-
+        int word_len = get_word_len(tokens[i].instruction);
         char word[word_len] = {};
         strncpy(word, tokens[i].instruction, word_len);
         word[word_len - 1] = 0;
@@ -158,13 +150,21 @@ int main(int argc, char *argv[]) {
 
     while (fgets(buffer, MAX_DATA_SIZE, stdin) != NULL) {
 
-        // empty line = module finished
-        // printf("buffer_len = %lu\n", strlen(buffer));
-        if (strlen(buffer) <= 2) {
+        if (strlen(buffer) <= 2/*  ||
+            line_count >= 1 &&
+                tokens[line_count - 1].instruction[get_word_len(
+                    tokens[line_count - 1].instruction) + 1] == '\0' */) {
+
             module_print(tokens, line_count);
             line_count = 0;
             continue;
         }
+        // else {
+        //     printf("%s: buff = %lu\tword = %d\tinst = %lu\n",
+        //            tokens[line_count - 1].instruction, strlen(buffer),
+        //            get_word_len(tokens[line_count - 1].instruction),
+        //            strlen(tokens[line_count - 1].instruction));
+        // }
 
         if (line_count >= TOKEN_LINES) {
             fprintf(stderr,
@@ -175,7 +175,6 @@ int main(int argc, char *argv[]) {
 
         tokenline_add(&tokens[line_count], buffer);
         line_count++;
-        // printf("line_count = %d\n", line_count);
     }
     module_print(tokens, line_count);
 
