@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define MAX_DATA_SIZE 1024
-#define TOKEN_LINES 24
+#define TOKEN_LINES 8
 #define TOKEN_LENGTH 512
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
@@ -42,12 +42,12 @@ struct TokenLine {
 
 void strncpy_trim(char *dest, const char *src, const unsigned int n) {
     assert(src != NULL);
-    assert(strlen(src) != 0);
+    assert(strnlen(src, 2) != 0);
     assert(strlen(src) <= n);
 
     int j = 0;
     for (int i = 0; src[i] != 0 || i < n - 1; ++i) {
-        if (src[i] == '\n' || src[i] == '\0')
+        if (src[i] == '\n' || src[i] == '\0' || src[i] == '\r')
             break;
 
         if (src[i] != ' ' || j != 0 && src[i + 1] != ' ' && src[i + 1] != 0) {
@@ -62,7 +62,7 @@ void tokenline_add(struct TokenLine *tokenline, const char *line) {
 
     char *str = strdup(line);
     assert(str != NULL);
-    assert(strlen(str) != 0);
+    assert(strnlen(str, 2) != 0);
 
     char *split = strstr(str, ";");
     if (split != NULL) {
@@ -89,7 +89,7 @@ void tokenline_add(struct TokenLine *tokenline, const char *line) {
 int get_word_len(char *str) {
     int word_len = 0;
     while (str[word_len] != ' ' && str[word_len] != 0 &&
-           str[word_len] != '\n') {
+           str[word_len] != '\n' && str[word_len] != '\r') {
         word_len++;
     }
     return ++word_len;
@@ -135,11 +135,9 @@ void module_print(struct TokenLine *tokens, const unsigned int line_count) {
             printf("  %*s %s",
                    alignment - (int)strlen(tokens[i].instruction) + 1, ";",
                    tokens[i].comment);
+
         printf("\n");
     }
-
-    if (line_count > 0)
-        printf("\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -147,30 +145,35 @@ int main(int argc, char *argv[]) {
 
     struct TokenLine tokens[TOKEN_LINES] = {0};
     int line_count = 0;
+    bool oversized = false;
 
     while (fgets(buffer, MAX_DATA_SIZE, stdin) != NULL) {
 
-        if (strlen(buffer) <= 2/*  ||
+        // an oversized module is usually the long comment at the bottom
+        if (line_count >= TOKEN_LINES) {
+            oversized = true;
+            for (int i = 0; i < line_count; i++) {
+                printf("; %s\n", tokens[i].comment);
+            }
+            line_count = 0;
+        }
+
+        if (oversized) {
+            strncpy_trim(tokens[0].comment, buffer, TOKEN_LENGTH);
+            printf("%s\n", tokens[0].comment);
+            continue;
+        }
+
+        if (strnlen(buffer, 3) <= 2/*  ||
             line_count >= 1 &&
                 tokens[line_count - 1].instruction[get_word_len(
                     tokens[line_count - 1].instruction) + 1] == '\0' */) {
 
             module_print(tokens, line_count);
+            printf("\n");
+
             line_count = 0;
             continue;
-        }
-        // else {
-        //     printf("%s: buff = %lu\tword = %d\tinst = %lu\n",
-        //            tokens[line_count - 1].instruction, strlen(buffer),
-        //            get_word_len(tokens[line_count - 1].instruction),
-        //            strlen(tokens[line_count - 1].instruction));
-        // }
-
-        if (line_count >= TOKEN_LINES) {
-            fprintf(stderr,
-                    "Module exceeded maximum line capacity, stopping...\n");
-            module_print(tokens, line_count);
-            return EXIT_FAILURE;
         }
 
         tokenline_add(&tokens[line_count], buffer);
