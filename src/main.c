@@ -19,21 +19,31 @@ bool token_in_array(const char *token, char **arr, const int size) {
 }
 
 const char *instructions[] = {
-    "mov",   "add",   "sub",    "mul",   "div",    "inc",    "dec",
-    "cmp",   "test",  "jmp",    "je",    "jne",    "jg",     "jge",
-    "jl",    "jle",   "jz",     "jnz",   "jo",     "jno",    "js",
-    "jns",   "call",  "ret",    "push",  "pop",    "lea",    "nop",
-    "int",   "iret",  "lcall",  "lret",  "xchg",   "shl",    "shr",
-    "sal",   "sar",   "rol",    "ror",   "clc",    "stc",    "cli",
-    "sti",   "cld",   "std",    "wait",  "pause",  "fild",   "fist",
-    "fistp", "fld",   "fst",    "fstp",  "fcomp",  "fadd",   "fsub",
-    "fmul",  "fdiv",  "fchs",   "finit", "fsqrt",  "fptan",  "frndint",
-    "fsubr", "faddp", "fmulp",  "fdivp", "fcompp", "fwait",  "fxch",
-    "fsin",  "fcos",  "fscale", "fucom", "fucomp", "fisttp", "fucompp",
-    "movsb", "movsw", "movsd",  "stosb", "stosw",  "stosd",  "lodsb",
-    "lodsw", "lodsd", "scasb",  "scasw", "scasd",  "cmpsb",  "cmpsw",
-    "cmpsd", "rep",   "repe",   "repne", "repnz",  "repz",   "lock",
-    "[bits", "db",    "dw",     "dd",    "dq",     "db",     "movzx"};
+    "aaa",   "aad",    "aam",   "aas",    "adc",   "add",    "and",    "arpl",
+    "bound", "bsf",    "bsr",   "bswap",  "bt",    "btc",    "btr",    "bts",
+    "call",  "cbw",    "clc",   "cld",    "cli",   "clts",   "cmc",    "cmp",
+    "cmpsb", "cmpsw",  "cmpsd", "cmpsq",  "cwd",   "cwde",   "cdq",    "cdqe",
+    "daa",   "das",    "dec",   "div",    "enter", "esc",    "hlt",    "idiv",
+    "imul",  "in",     "inc",   "insb",   "insw",  "insd",   "insq",   "int",
+    "into",  "iret",   "ja",    "jae",    "jb",    "jbe",    "jc",     "jcxz",
+    "je",    "jg",     "jge",   "jl",     "jle",   "jmp",    "jna",    "jnae",
+    "jnb",   "jnbe",   "jnc",   "jne",    "jng",   "jnge",   "jnl",    "jnle",
+    "jno",   "jnp",    "jns",   "jnz",    "jo",    "jp",     "jpe",    "jpo",
+    "js",    "jz",     "lahf",  "lds",    "lea",   "les",    "lock",   "lodsb",
+    "lodsw", "lodsd",  "lodsq", "loop",   "loope", "loopne", "loopnz", "loopz",
+    "mov",   "movsb",  "movsw", "movsd",  "movsq", "movsx",  "movzx",  "mul",
+    "neg",   "nop",    "not",   "or",     "out",   "outsb",  "outsw",  "outsd",
+    "outsq", "pop",    "popa",  "popf",   "push",  "pusha",  "pushf",  "rcl",
+    "rcr",   "rep",    "repe",  "repne",  "repnz", "repz",   "ret",    "rol",
+    "ror",   "sal",    "sar",   "sbb",    "scasb", "scasw",  "scasd",  "scasq",
+    "seta",  "setae",  "setb",  "setbe",  "setc",  "sete",   "setg",   "setge",
+    "setl",  "setle",  "setna", "setnae", "setnb", "setnbe", "setnc",  "setne",
+    "setng", "setnge", "setnl", "setnle", "setno", "setnp",  "setns",  "setnz",
+    "seto",  "setp",   "setpe", "setpo",  "sets",  "setz",   "shl",    "shr",
+    "shld",  "shrd",   "sidt",  "sgdt",   "shldt", "sldt",   "smsw",   "stc",
+    "std",   "sti",    "stosb", "stosw",  "stosd", "stosq",  "sub",    "test",
+    "ud2",   "xchg",   "xlat",  "xor",    "xadd",  "xlatb",  "[bits",  "dd",
+    "db",    "dq"};
 
 struct TokenLine {
     char instruction[TOKEN_LENGTH];
